@@ -1,0 +1,226 @@
+
+ *
+  Smart Baby Monitor with ThingSpeak + Twilio Alerts
+  - Sensors: DHT22 (temperature), Sound (analog), PIR (digital)
+  - Outputs: Buzzer (digital)
+  - Cloud: Twilio SMS + ThingSpeak logging
+*/
+
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <WiFiClientSecure.h>
+#include <DHT.h>
+
+// ======= CONFIG =======
+const char* WIFI_SSID = "NVMsnehazzz";
+const char* WIFI_PASS = "10101010";
+
+// === Twilio Config ===
+const char* TWILIO_ACCOUNT_SID = "AC8d1aacfee40a8989d95cc5ca823d1dc2";
+const char* TWILIO_AUTH_TOKEN   = "2efff5a58b88aae9aaff4f5d328d911c";
+const char* TWILIO_FROM_NUMBER  = "+16205511493";
+const char* TO_PHONE_NUMBER     = "+917411026004";
+
+// === ThingSpeak Config ===
+const char* THINGSPEAK_API_KEY = "G477LB9H57Y90RTM";
+const char* THINGSPEAK_URL = "http://api.thingspeak.com/update";
+
+// === Pins ===
+const int PIN_DHT = 26;
+const int PIN_SOUND = 34;
+const int PIN_PIR = 12;
+const int PIN_BUZZER = 25;
+
+// === Thresholds ===
+#define DHTTYPE DHT22
+DHT dht(PIN_DHT, DHTTYPE);
+
+const int SOUND_THRESHOLD = 500;
+const float TEMP_ALERT_C = 27.0;
+const unsigned long SMS_COOLDOWN_MS = 120000; // 2 min cooldown
+
+// === Timing ===
+unsigned long lastSoundSms = 0;
+unsigned long lastTempSms = 0;
+unsigned long lastMotionSms = 0;
+unsigned long lastBuzzerTime = 0;
+const unsigned long BUZZER_DURATION_MS = 5000;
+
+WiFiClientSecure clientSecure;
+
+// ===============================
+//  Twilio SMS Function
+// ===============================
+bool sendSmsViaTwilio(const String &body) {
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("WiFi not connected — cannot send SMS");
+    return false;
+  }
+
+  String url = String("https://api.twilio.com/2010-04-01/Accounts/") + TWILIO_ACCOUNT_SID + "/Messages.json";
+  String payload = "To=" + String(TO_PHONE_NUMBER) + "&From=" + String(TWILIO_FROM_NUMBER) + "&Body=" + body;
+
+  HTTPClient https;
+  clientSecure.setInsecure();
+  https.begin(clientSecure, url);
+  https.setAuthorization(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+  https.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  int httpCode = https.POST(payload);
+  if (httpCode > 0) {
+    Serial.printf("Twilio HTTP code: %d\nResponse: %s\n", httpCode, https.getString().c_str());
+  } else {
+    Serial.printf("Error on sending SMS: %s\n", https.errorToString(httpCode).c_str());
+  }
+  https.end();
+
+  return (httpCode >= 200 && httpCode < 300);
+}
+
+// ===============================
+//  ThingSpeak Upload Function
+// ===============================
+void uploadToThingSpeak(float temp, int sound, int motion) {
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("WiFi not connected — skipping ThingSpeak upload");
+    return;
+  }
+
+  HTTPClient http;
+  String url = String(THINGSPEAK_URL) +
+               "?api_key=" + THINGSPEAK_API_KEY +
+               "&field1=" + String(temp, 2) +
+               "&field2=" + String(sound) +
+               "&field3=" + String(motion);
+
+  http.begin(url);
+  int httpCode = http.GET();
+
+  if (httpCode > 0) {
+    Serial.printf("ThingSpeak Response: %d\n", httpCode);
+  } else {
+    Serial.printf("ThingSpeak Error: %s\n", http.errorToString(httpCode).c_str());
+  }
+  http.end();
+}
+
+// ===============================
+//  Sensor Functions
+// ===============================
+void checkTemperature(float &temperature) {
+  temperature = dht.readTemperature();
+  if (isnan(temperature)) {
+    Serial.println("Failed to read from DHT sensor");
+    return;
+  }
+
+  Serial.printf("Temperature: %.2f °C\n", temperature);
+  unsigned long now = millis();
+
+  if (temperature >= TEMP_ALERT_C && (now - lastTempSms >= SMS_COOLDOWN_MS)) {
+    String msg = "🔥 ALERT: Baby room temperature is high (" + String(temperature, 1) + " °C)";
+    Serial.println("Sending temperature alert SMS...");
+    if (sendSmsViaTwilio(msg)) {
+      lastTempSms = now;
+    }
+  }
+}
+
+void checkSound(int &soundVal) {
+  soundVal = analogRead(PIN_SOUND);
+  Serial.printf("Sound (ADC): %d\n", soundVal);
+  unsigned long now = millis();
+
+  if (soundVal >= SOUND_THRESHOLD && (now - lastSoundSms >= SMS_COOLDOWN_MS)) {
+    String msg = "🔊 ALERT: Loud sound detected (possible baby cry).";
+    Serial.println("Sending sound alert SMS...");
+    if (sendSmsViaTwilio(msg)) {
+      lastSoundSms = now;
+    }
+  }
+}
+
+void checkMotion(int &motionVal) {
+  motionVal = digitalRead(PIN_PIR);
+  unsigned long now = millis();
+
+  if (motionVal == HIGH) {
+    Serial.println("🚶 Motion detected!");
+    digitalWrite(PIN_BUZZER, HIGH);
+    lastBuzzerTime = now;
+
+    if (now - lastMotionSms >= SMS_COOLDOWN_MS) {
+      String msg = "🚨 ALERT: Motion detected in baby room!";
+      Serial.println("Sending motion alert SMS...");
+      if (sendSmsViaTwilio(msg)) {
+        lastMotionSms = now;
+      }
+    }
+  }
+
+  if (digitalRead(PIN_BUZZER) == HIGH && (now - lastBuzzerTime >= BUZZER_DURATION_MS)) {
+    digitalWrite(PIN_BUZZER, LOW);
+  }
+}
+
+// ===============================
+//  SETUP
+// ===============================
+void setup() {
+  Serial.begin(115200);
+  delay(100);
+
+  pinMode(PIN_BUZZER, OUTPUT);
+  digitalWrite(PIN_BUZZER, LOW);
+  pinMode(PIN_PIR, INPUT);
+
+  dht.begin();
+  analogReadResolution(12);
+
+  Serial.printf("Connecting to WiFi %s\n", WIFI_SSID);
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+
+  int tries = 0;
+  while (WiFi.status() != WL_CONNECTED && tries < 40) {
+    delay(500);
+    Serial.print(".");
+    tries++;
+  }
+  Serial.println();
+
+  if (WiFi.status() == WL_CONNECTED)
+    Serial.println("✅ WiFi connected! IP: " + WiFi.localIP().toString());
+  else
+    Serial.println("❌ Failed to connect to WiFi.");
+
+  lastSoundSms = millis() - SMS_COOLDOWN_MS;
+  lastTempSms = millis() - SMS_COOLDOWN_MS;
+  lastMotionSms = millis() - SMS_COOLDOWN_MS;
+}
+
+unsigned long lastSensorCheck = 0;
+const unsigned long SENSOR_POLL_MS = 1500;
+
+// ===============================
+//  LOOP
+// ===============================
+void loop() {
+  unsigned long now = millis();
+
+  if (now - lastSensorCheck >= SENSOR_POLL_MS) {
+    lastSensorCheck = now;
+
+    float temperature = 0;
+    int soundVal = 0;
+    int motionVal = 0;
+
+    checkTemperature(temperature);
+    checkSound(soundVal);
+    checkMotion(motionVal);
+
+    // Upload to ThingSpeak
+    uploadToThingSpeak(temperature, soundVal, motionVal);
+  }
+
+  delay(10);
+} 
