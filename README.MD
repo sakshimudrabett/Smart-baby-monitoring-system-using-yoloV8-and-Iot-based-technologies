@@ -168,9 +168,9 @@ This project demonstrates:
 
 ## 👥 Team Members
 
-- Sakshi Mudrabett  
-- Team Member 2  
-- Team Member 3  
+- Sakshi C Mudrabett  
+- Sai Keerthi S
+- Sneha S  
 
 ---
 
