@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Parent Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>Parent Login</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="post">
+            <input name="username" placeholder="Username" required>
+
+            <div class="password-wrapper">
+                <input id="login-password" name="password" type="password" placeholder="Password" required>
+                <span class="toggle-password" onclick="togglePassword('login-password', this)">👁</span>
+            </div>
+
+            <button type="submit">Sign In</button>
+        </form>
+
+        <div class="auth-link">
+            Don’t have an account? <a href="/signup">Create one</a>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword(inputId, icon) {
+    const input = document.getElementById(inputId);
+    if (input.type === "password") {
+        input.type = "text";
+        icon.textContent = "🙈";
+    } else {
+        input.type = "password";
+        icon.textContent = "👁";
+    }
+}
+</script>
+
+</body>
+</html>

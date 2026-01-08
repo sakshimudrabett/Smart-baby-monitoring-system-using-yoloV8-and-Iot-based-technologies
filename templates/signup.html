@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Parent Signup</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>Create Account</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="post">
+            <input name="username" placeholder="Username" required>
+
+            <!-- ✅ PHONE NUMBER (10 DIGITS ONLY) -->
+            <input
+                name="phone"
+                placeholder="Phone Number"
+                maxlength="10"
+                pattern="[0-9]{10}"
+                title="Enter a 10-digit phone number"
+                required
+            >
+
+            <div class="password-wrapper">
+                <input id="signup-password" name="password" type="password" placeholder="Password" required>
+                <span class="toggle-password" onclick="togglePassword('signup-password', this)">👁</span>
+            </div>
+
+            <button type="submit">Register</button>
+        </form>
+
+        <div class="auth-link">
+            Already registered? <a href="/">Login</a>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword(inputId, icon) {
+    const input = document.getElementById(inputId);
+    if (input.type === "password") {
+        input.type = "text";
+        icon.textContent = "🙈";
+    } else {
+        input.type = "password";
+        icon.textContent = "👁";
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Parent Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="dashboard">
+    <h1>Live Monitoring Dashboard</h1>
+
+    <!-- CAMERA -->
+    <div class="video-card">
+        <div id="cameraStatus" class="camera-status camera-offline">
+            <span class="status-dot"></span>
+            OFFLINE
+        </div>
+        <img id="cameraFeed" src="/video_feed">
+    </div>
+
+    <!-- SENSORS -->
+    <div class="sensor-grid">
+        <div class="sensor-card">
+            <h3>Temperature</h3>
+            <div class="sensor-value">-- °C</div>
+        </div>
+
+        <div class="sensor-card">
+            <h3>Sound Level</h3>
+            <div class="sensor-value">-- dB</div>
+        </div>
+    </div>
+
+    <!-- ACTIVITY LOG -->
+    <div class="activity-card">
+        <h3>Recent Activity</h3>
+        <ul class="activity-list">
+            <li>
+                <span class="activity-dot live"></span>
+                Live monitoring started
+                <span class="activity-time">Just now</span>
+            </li>
+            <li>
+                <span class="activity-dot detect"></span>
+                Baby detected in frame
+                <span class="activity-time">1 min ago</span>
+            </li>
+            <li>
+                <span class="activity-dot info"></span>
+                System running normally
+                <span class="activity-time">2 mins ago</span>
+            </li>
+        </ul>
+    </div>
+
+    <a class="logout" href="/logout">Logout</a>
+</div>
+
+<script>
+    const feed = document.getElementById("cameraFeed");
+    const status = document.getElementById("cameraStatus");
+
+    feed.onload = () => {
+        status.classList.remove("camera-offline");
+        status.classList.add("camera-live");
+        status.innerHTML = '<span class="status-dot"></span> LIVE';
+    };
+
+    feed.onerror = () => {
+        status.classList.remove("camera-live");
+        status.classList.add("camera-offline");
+        status.innerHTML = '<span class="status-dot"></span> OFFLINE';
+    };
+</script>
+
+</body>
+</html>

@@ -1,0 +1,298 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+/* ================= GLOBAL ================= */
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    color: #e5e7eb;
+
+    background:
+        radial-gradient(circle at 20% 20%, rgba(59,130,246,0.15), transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(99,102,241,0.12), transparent 40%),
+        linear-gradient(180deg, #0b1220, #0f172a);
+}
+
+/* ================= AUTH (LOGIN / SIGNUP) ================= */
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.auth-card {
+    width: 360px;
+    padding: 36px;
+    background: rgba(17, 24, 39, 0.92);
+    border: 1px solid #1f2937;
+    border-radius: 10px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+}
+
+.auth-card h2 {
+    text-align: center;
+    margin-bottom: 26px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* Inputs */
+.auth-card input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 14px;
+    background: #020617;
+    border: 1px solid #1f2937;
+    border-radius: 6px;
+    color: #e5e7eb;
+    font-size: 14px;
+}
+
+.auth-card input::placeholder {
+    color: #9ca3af;
+}
+
+.auth-card input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px rgba(59,130,246,0.35);
+}
+
+/* Button */
+.auth-card button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    background: #3b82f6;
+    border: none;
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.auth-card button:hover {
+    background: #2563eb;
+}
+
+/* Auth links */
+.auth-link {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 13px;
+}
+
+.auth-link a {
+    color: #93c5fd;
+    text-decoration: none;
+}
+
+/* ================= DASHBOARD ================= */
+.dashboard {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.dashboard h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* ================= CAMERA ================= */
+.video-card {
+    position: relative;
+    width: 100%;
+    max-width: 760px;
+    background: #020617;
+    border: 1px solid #1f2937;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 35px;
+}
+
+/* Camera status badge */
+.camera-status {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 10;
+}
+
+.camera-live {
+    background: #22c55e;
+    color: #022c22;
+}
+
+.camera-offline {
+    background: #ef4444;
+    color: #450a0a;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.video-card img {
+    display: block;
+    width: 100%;
+    height: 420px;
+    object-fit: cover;
+}
+
+/* ================= SENSORS ================= */
+.sensor-grid {
+    width: 100%;
+    max-width: 760px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.sensor-card {
+    background: #111827;
+    border: 1px solid #1f2937;
+    border-radius: 10px;
+    padding: 22px;
+    text-align: center;
+}
+
+.sensor-card h3 {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: #9ca3af;
+}
+
+.sensor-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #e5e7eb;
+}
+
+/* ================= LOGOUT ================= */
+.logout {
+    margin-top: 35px;
+    font-size: 14px;
+    color: #fca5a5;
+    text-decoration: none;
+}
+.alert {
+    padding: 8px;
+    margin-bottom: 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    text-align: center;
+}
+
+.alert.error {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fecaca;
+    border: 1px solid #ef4444;
+}
+
+.alert.success {
+    background: rgba(34, 197, 94, 0.15);
+    color: #bbf7d0;
+    border: 1px solid #22c55e;
+}
+/* ================= PASSWORD TOGGLE ================= */
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper input {
+    padding-right: 40px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 14px;
+    color: #9ca3af;
+    user-select: none;
+}
+
+.toggle-password:hover {
+    color: #e5e7eb;
+}
+/* ================= ACTIVITY LOG ================= */
+.activity-card {
+    width: 100%;
+    max-width: 760px;
+    background: #0b1220;
+    border: 1px solid #1f2937;
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin-top: 30px;
+}
+
+.activity-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    color: #9ca3af;
+}
+
+.activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.activity-list li {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: #e5e7eb;
+    margin-bottom: 10px;
+}
+
+.activity-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.activity-dot.live {
+    background: #22c55e;
+}
+
+.activity-dot.detect {
+    background: #3b82f6;
+}
+
+.activity-dot.info {
+    background: #9ca3af;
+}
+
+.activity-time {
+    margin-left: auto;
+    font-size: 11px;
+    color: #6b7280;
+}
