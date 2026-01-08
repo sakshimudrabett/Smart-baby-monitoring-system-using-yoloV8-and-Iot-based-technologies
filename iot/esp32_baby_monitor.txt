@@ -1,4 +1,9 @@
+Smart Baby Monitor – ESP32 IoT Code
 
+NOTE:
+This file contains the Arduino (ESP32) source code used for IoT integration.
+It is provided for academic reference and documentation purposes.
+The code was developed and tested using Arduino IDE.
  *
   Smart Baby Monitor with ThingSpeak + Twilio Alerts
   - Sensors: DHT22 (temperature), Sound (analog), PIR (digital)
